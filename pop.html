@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      input:focus,input:active {
+        box-shadow: none !important;
+      }
+      .f-10 {
+        font-size: 10px;
+      }
+      .f-w-900 {
+        font-weight:900;
+      }
+      .c-red {
+        color: red;
+      }
+      .ndl:hover{
+        cursor: pointer;
+      }
+      .bd-callout-info {
+        border: 1px solid #eee;
+        border-left-width: 0.25rem;
+        border-radius: 0.15rem;
+        padding: .8rem;
+      }
+      .b-l-blue {
+        border-left-color: #5bc0de;
+      }
+      .b-l-yellow {
+        border-left-color: #f0ad4e;
+      }
+    </style>
+    <script src="js/jquery.min.js"></script>
+   </head>
+   <body>
+      <div class="card" style="width: 15rem;">
+        <div class="card-body">
+          <b class="card-title">Viu下载 - dreamfly</b>
+          <p class="font-weight-lighter mt-2 text-break f-10">说明：本插件解析后,解压的<b class="f-w-900">bat</b>为可执行文件<span class="c-red f-w-900">（插件开源，无后门，请放心）</span>，将bat放到<b>"<a data-href="https://github.com/nilaoda/N_m3u8DL-CLI" class="ndl">N_m3u8DL-CLI</a>"</b>、ffmpeg目录中(或配置环境变量)，配合<b>"<a data-href="https://github.com/nilaoda/N_m3u8DL-CLI" class="ndl">N_m3u8DL-CLI</a>"</b>工具下载，插件仅供学习研究，请勿滥用！下载后请于24小时内删除，多谢合作！</p>
+          <hr/>
+          <div class="group">
+            <a href="#" id="downOne" class="btn btn-outline-primary btn-sm btn-block">单集下载</a>
+            <a href="#" id="downMul" class="btn btn-outline-info btn-sm btn-block">全集下载</a>
+           </div>
+        </div>
+      </div>
+      <script src="js/jquery.min.js"></script>
+      <script src="js/jszip/jszip.min.js"></script>
+      <script src="js/jszip/FileSaver.js"></script>
+      <script src="js/dreamfly.js"></script>
+      <script src="js/sendchromemsg.js"></script>
+      <script src="js/click.js"></script>
+      <script src="js/ajax.js"></script>
+    </body>
+</html>

@@ -1,0 +1,49 @@
+﻿{
+    "name":"__MSG_title__",
+    "description":"__MSG_desc__",
+    "version":"1.0.0",
+    "default_locale":"zh_CN",
+    "permissions":[
+        "contextMenus",
+        "tabs",
+        "https://www.viu.com/*",
+        "http://www.viu.com/*",
+        "webRequest",
+        "webRequestBlocking",
+        "storage"
+    ],
+    "icons":{
+        "16":"logo/logo16x16.png",
+        "48":"logo/logo48x48.png",
+        "128":"logo/logo128x128.png",
+        "256":"logo/logo256x256.png"
+    },
+    "background":{
+        "scripts":[
+            "js/jquery.min.js",
+            "js/dreamfly.js",
+            "js/sendchromemsg.js",
+            "js/tab.js",
+            "js/click.js"
+        ],
+        "css": ["css/bootstrap.min.css"]
+    },
+    "browser_action" : {
+        "default_popup": "pop.html"
+    },
+    "web_accessible_resources": [
+        "js/jquery.min.js",
+        "js/jszip/jszip.min.js",
+        "js/jszip/FileSaver.js",
+        "js/index.js",
+        "js/ajax.js"
+    ],
+    "content_scripts": [
+        {
+          "matches": ["https://www.viu.com/*","http://www.viu.com/*"],
+          "js": ["js/inject.js"],
+          "run_at": "document_end"
+        }
+    ],
+    "manifest_version":2
+}
