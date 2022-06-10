@@ -85,7 +85,8 @@ async function startDown(arr){
     let batContent = 'chcp 65001',
     zip = new JSZip(),
     zipName = '',
-    batName = '';
+    batName = '',
+    subtitlesArr = [];
     for (ep of arr) {
         let url = ep.url,
         title = ep.title,
@@ -96,29 +97,36 @@ async function startDown(arr){
         if(subtitles instanceof Array) {
             for (sub of subtitles) {
                 let name = `${title} ${sub.name} ${sub.code}.vtt`,
-                url = sub.url,
-                content = await sendAxio(url);
-                zip.file(name,content);
+                url = sub.url;
+                subtitlesArr.push({'name':name,'url':url});
             }
         }
     };
-    if(arr.length === 1){
-        let o = arr[0];
-        batName = `${o.title}.bat`;
-        zipName = `${o.title}.zip`;
-    }else {
-        batName = `${epTitle}.bat`;
-        zipName = `${epTitle}.zip`;
-    }
-    if (batContent !== 'chcp 65001') {
-        zip.file(batName, batContent);
-        zip.generateAsync({type:'blob'}).then(function(content) {
-            // see FileSaver.js
-            saveAs(content, zipName);
-        });    
-    }else {
-        alert('error');
-    }
+    let results = subtitlesArr.map(async sub => {
+        let url = sub.url,
+        name = sub.name,
+        content = await sendAxio(url);
+        zip.file(name,content);
+    });
+    await Promise.all(results).then(() => {
+        if(arr.length === 1){
+            let o = arr[0];
+            batName = `${o.title}.bat`;
+            zipName = `${o.title}.zip`;
+        }else {
+            batName = `${epTitle}.bat`;
+            zipName = `${epTitle}.zip`;
+        }
+        if (batContent !== 'chcp 65001') {
+            zip.file(batName, batContent);
+            zip.generateAsync({type:'blob'}).then(function(content) {
+                // see FileSaver.js
+                saveAs(content, zipName);
+            });    
+        }else {
+            alert('error');
+        }
+    });
 }
 
 function getApi(epId) {
