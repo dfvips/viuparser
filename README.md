@@ -2,7 +2,7 @@
  <a href="https://www.viu.com">Viu</a>解析工具 chrome扩展程序
 <h2>新增内容</h2>
 支持<a href="https://github.com/nilaoda/N_m3u8DL-RE/actions" rel="nofollow">N_m3u8DL-RE</a>,自动封装字幕到mp4，同时保留<a href="https://github.com/nilaoda/N_m3u8DL-CLI" rel="nofollow">N_m3u8DL</a>指令。
-<img src="[https://user-images.githubusercontent.com/21048630/188654538-0419094b-a510-4144-859f-1e0d5d61ca96.png" />
+<img src="https://user-images.githubusercontent.com/21048630/188654538-0419094b-a510-4144-859f-1e0d5d61ca96.png" />
 <h2>使用方法</h2>
 <ol>
 <li>
