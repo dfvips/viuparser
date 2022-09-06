@@ -83,9 +83,11 @@ async function sortList (eps){
 //开始下载
 async function startDown(arr){
     let batContent = 'chcp 65001',
+    newBatContent = 'chcp 65001',
     zip = new JSZip(),
     zipName = '',
     batName = '',
+    newBatName = '',
     subtitlesArr = [];
     for (ep of arr) {
         let url = ep.url,
@@ -93,12 +95,14 @@ async function startDown(arr){
         subtitles = ep.subtitles;
         if(ep.url != undefined) {
             batContent += '\r\n' + `N_m3u8DL-CLI "${url}" --saveName "${title}" --enableDelAfterDone --enableBinaryMerge`;
+            newBatContent += '\r\n' + `N_m3u8DL-RE "${url}" --save-name "${title}" --auto-select --mp4-real-time-decryption -M format=mp4 -mt`
         }
         if(subtitles instanceof Array) {
             for (sub of subtitles) {
                 let name = `${title} ${sub.name} ${sub.code}.vtt`,
                 url = sub.url;
                 subtitlesArr.push({'name':name,'url':url});
+                newBatContent += ` --mux-import path="${name}":lang=${sub.code}:name="${sub.name}"`;
             }
         }
     };
@@ -112,13 +116,16 @@ async function startDown(arr){
         if(arr.length === 1){
             let o = arr[0];
             batName = `${o.title}.bat`;
+            newBatName = `${o.title}_RE.bat`;
             zipName = `${o.title}.zip`;
         }else {
             batName = `${epTitle}.bat`;
+            newBatName = `${epTitle}_RE.bat`;
             zipName = `${epTitle}.zip`;
         }
         if (batContent !== 'chcp 65001') {
             zip.file(batName, batContent);
+            zip.file(newBatName, newBatContent);
             zip.generateAsync({type:'blob'}).then(function(content) {
                 // see FileSaver.js
                 saveAs(content, zipName);
