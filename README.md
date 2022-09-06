@@ -10,8 +10,8 @@
 </li>
 <li>
 <p>解析后，解压下载的文件，bat为可执行文件（插件开源，无后门，请放心），放到"<a href="https://github.com/nilaoda/N_m3u8DL-CLI" rel="nofollow">N_m3u8DL-CLI</a>"、ffmpeg目录中(或配置环境变量)，目录中，配合"<a href="https://github.com/nilaoda/N_m3u8DL-CLI" rel="nofollow">N_m3u8DL-CLI</a>"工具下载</p>
-<p><a href="https://github.com/nilaoda/N_m3u8DL-RE/actions" rel="nofollow">N_m3u8DL-RE</a>工具使用说明同上。</p>
 </li>
+<li><a href="https://github.com/nilaoda/N_m3u8DL-RE/actions" rel="nofollow">N_m3u8DL-RE</a>工具使用说明同上。</li>
 </ol>
 <h2>操作步骤</h2>
 <h3>方法一</h3>
