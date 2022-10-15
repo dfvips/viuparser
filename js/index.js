@@ -64,18 +64,19 @@ async function sortList (eps){
         },
         vodData = await sendAxio(vodApi,header); //请求
         vodData = JSON.parse(vodData);
+        let urls,url,obj;
         if(typeof vodData.data !== 'undefined') {
-            let urls = vodData.data.stream.url,
-            url = Object.values(urls).reverse()[0],
-            obj = {
-                'title': curTitle,
-                'url': url,
-                'subtitles': subtitles
-            };
-            return obj;
+            urls = vodData.data.stream.url;
+            url = Object.values(urls).reverse()[0];
         }else {
-            return {};
+            url = '';
         }
+        obj = {
+            'title': curTitle,
+            'url': url,
+            'subtitles': subtitles
+        };
+        return obj;
     });
     let epsAll = await Promise.all(results);
     return epsAll;
@@ -137,12 +138,12 @@ async function startDown(arr){
 }
 
 function getApi(epId) {
-    let api = `https://www.viu.com/ott/hk/index.php?area_id=1&language_flag_id=1&cpreference_id=&r=vod/ajax-detail&platform_flag_label=web&area_id=1&language_flag_id=1&cpreference_id=&product_id=${epId}&ut=0`;
+    let api = `https://www.viu.com${web_api_url}&product_id=${epId}&ut=0`.replace('&r=','&r=vod/ajax-detail&platform_flag_label=web');
     return api;
 }
 
 function getVodApi(cId) {
-    let api = `https://api-gateway-global.viu.com/api/playback/distribute?cpreference_id=&ccs_product_id=${cId}&language_flag_id=1`;
+    let api = `https://api-gateway-global.viu.com/api/playback/distribute?cpreference_id=&ccs_product_id=${cId}&language_flag_id=${global_area_id}`;
     return api;
 }
 
