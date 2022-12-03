@@ -56,6 +56,8 @@ async function sortList (eps){
         synopsis = current_product.synopsis,
         curTitle = `${epTitle} ${num} ${synopsis}`,
         vodApi = getVodApi(ccs_product_id), //m3u Api
+        // secondSublistApi = getSecondSub(epId), //second subtitle Api
+        // secondSublistsData = {},
         authorization = getCookie("generalSettings"),token = `Bearer ${JSON.parse(authorization).token}`,//token
         header = {
             'authorization':token, //请求头
@@ -64,17 +66,24 @@ async function sortList (eps){
         },
         vodData = await sendAxio(vodApi,header); //请求
         vodData = JSON.parse(vodData);
+        // secondSubData = await sendAxio(secondSublistApi,header); //请求
+        // secondSubData = JSON.parse(secondSubData);
+        // try {
+        //     secondSublistsData = secondSubData.data.current_product.subtitle;
+        //     secondSublistsData = secondSublistsData.filter(obj => obj.second_subtitle_url !== '');
+        // }catch(e){
+        //     secondSublistsData = [];
+        // }
         let urls,url,obj;
         if(typeof vodData.data !== 'undefined') {
             urls = vodData.data.stream.url;
             url = Object.values(urls).reverse()[0];
-        }else {
-            url = '';
         }
         obj = {
             'title': curTitle,
             'url': url,
-            'subtitles': subtitles
+            'subtitles': subtitles,
+            // 'secondSub': secondSublistsData
         };
         return obj;
     });
@@ -85,15 +94,19 @@ async function sortList (eps){
 async function startDown(arr){
     let batContent = 'chcp 65001',
     newBatContent = 'chcp 65001',
+    shContent = '';
     zip = new JSZip(),
     zipName = '',
     batName = '',
     newBatName = '',
+    shName = '',
     subtitlesArr = [];
     for (ep of arr) {
         let url = ep.url,
         title = ep.title,
         subtitles = ep.subtitles;
+        // subtitles = subtitles.concat(ep.secondSub);
+        console.log(subtitles);
         if(ep.url != undefined) {
             batContent += '\r\n' + `N_m3u8DL-CLI "${url}" --saveName "${title}" --enableDelAfterDone --enableBinaryMerge`;
             newBatContent += '\r\n' + `N_m3u8DL-RE "${url}" --save-name "${title}" --auto-select --mp4-real-time-decryption -M format=mp4 -mt`
@@ -102,11 +115,18 @@ async function startDown(arr){
             for (sub of subtitles) {
                 let name = `${title} ${sub.name} ${sub.code}.vtt`,
                 url = sub.url;
-                subtitlesArr.push({'name':name,'url':url});
                 newBatContent += ` --mux-import path="${name}":lang=${sub.code}:name="${sub.name}"`;
+                subtitlesArr.push({'name':name,'url':url});
+                if(typeof sub.second_subtitle_url != 'undefined' && sub.second_subtitle_url !== '') {
+                    let name = `${title} ${sub.name} ${sub.code} describe.vtt`,
+                    url = sub.second_subtitle_url;
+                    newBatContent += ` --mux-import path="${name}":lang=${sub.code}:name="${sub.name} describe"`;
+                    subtitlesArr.push({'name':name,'url':url});
+                }
             }
         }
     };
+    shContent = newBatContent.replace('chcp 65001\r\n','');
     let results = subtitlesArr.map(async sub => {
         let url = sub.url,
         name = sub.name,
@@ -118,15 +138,18 @@ async function startDown(arr){
             let o = arr[0];
             batName = `${o.title}.bat`;
             newBatName = `${o.title}_RE.bat`;
+            shName = `${o.title}_RE.sh`;
             zipName = `${o.title}.zip`;
         }else {
             batName = `${epTitle}.bat`;
             newBatName = `${epTitle}_RE.bat`;
+            shName = `${epTitle}_RE.sh`;
             zipName = `${epTitle}.zip`;
         }
         if (batContent !== 'chcp 65001') {
             zip.file(batName, batContent);
             zip.file(newBatName, newBatContent);
+            zip.file(shName, shContent);
             zip.generateAsync({type:'blob'}).then(function(content) {
                 // see FileSaver.js
                 saveAs(content, zipName);
@@ -146,6 +169,11 @@ function getVodApi(cId) {
     let api = `https://api-gateway-global.viu.com/api/playback/distribute?cpreference_id=&ccs_product_id=${cId}&language_flag_id=${global_area_id}`;
     return api;
 }
+
+// function getSecondSub(epId) {
+//     let api = `https://api-gateway-global.viu.com/api/mobile?r=/series/detail&platform_flag_label=web&area_id=${global_area_id}&language_flag_id=${global_area_id}&cpreference_id=&product_id=${epId}&ut=0`;
+//     return api;
+// }
 
 //监听hash变化
 class Dep {                  // 订阅池
