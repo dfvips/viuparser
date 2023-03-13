@@ -1,12 +1,31 @@
 let epId,//视频编号
-episodes,currentEpInfo,epTitle,epCurrent;
+episodes,currentEpInfo,
+datas = Object.values(__NEXT_DATA__.props.pageProps.initialProps.fallback)[1],
+epdatas = datas.data,
+current_product = epdatas.current_product,
+series = epdatas.series,
+epTitle = series.name,epCurrent,flag = false,
+series_id = series.series_id,
+global_area_id = datas.server.area.area_id;
 
-function epConfig() {
-    let url = window.location.href;//基本信息
-    if(typeof product_id !== 'undefined') {
-        epId = String(product_id);
+async function epConfig() {
+    let url = window.location.href,
+    pageId = url.replace(/.*\/([^\/]+\/[^\/]+)$/, '$1').replace(/\/.*/g,'');//基本信息
+    flag = false;
+    if(typeof current_product.product_id !== 'undefined') {
+        epId = String(current_product.product_id);
+        if(epId != pageId) {
+            epId = pageId;
+            epdatasApi = getSubApi(epId);
+            epdatas = await sendAxio(epdatasApi);//当前视频全部信息
+            epdatas = JSON.parse(epdatas).data;
+            current_product = epdatas.current_product;
+            series = epdatas.series;
+            epTitle = series.name;
+            series_id = series.series_id;
+        }
     }else {
-        epId = url.replace(/.*\/([^\/]+\/[^\/]+)$/, '$1').replace(/\/.*/g,'');
+        epId = pageId;
     }
 }
 
@@ -14,15 +33,17 @@ epConfig();
 
 //获取全集id
 async function getEps(){
-   let api = getApi(epId);//Api
+   let api = getApi(series_id);//Api
    currentEpInfo = await sendAxio(api); //获取视频全部信息
    currentEpInfo = JSON.parse(currentEpInfo);
-   let series = currentEpInfo.data.series; //全集信息
-   epTitle = series.name;//剧名
-   episodes = series.product; //全集编号
-   if (episodes instanceof Array) {
-       episodes = episodes.reverse();//反转顺序
-   }
+//    let series = currentEpInfo.data.series; //全集信息
+//    let series = currentEpInfo.data.product_list; //全集信息
+//    epTitle = series.name;//剧名
+//    episodes = series.product; //全集编号
+   episodes = currentEpInfo.data.product_list; //全集编号
+//    if (episodes instanceof Array) {
+//        episodes = episodes.reverse();//反转顺序
+//    }
    epCurrent = Object.values(episodes).filter(ep => ep.product_id === epId);//过滤当前剧集
 };
 //开始任务
@@ -42,13 +63,13 @@ async function done (eps){
 //解析并获取全部数据
 async function sortList (eps){
     let results = eps.map(async ep => {
-        let epData,curId = ep.product_id,api = getApi(curId);//当前数据
-        if(curId !== epId) {
+        let epData,curId = ep.product_id,api = getSubApi(curId);//当前数据
+        // if(curId !== epId) {
             epData = await sendAxio(api);
             epData = JSON.parse(epData);
-        }else {
-            epData = currentEpInfo;//当前视频
-        }
+        // }else {
+        //     epData = currentEpInfo;//当前视频
+        // }
         let current_product = epData.data.current_product,//当前播放
         ccs_product_id = current_product.ccs_product_id, //视频序列号
         subtitles = current_product.subtitle, //字幕 Array
@@ -58,7 +79,7 @@ async function sortList (eps){
         vodApi = getVodApi(ccs_product_id), //m3u Api
         // secondSublistApi = getSecondSub(epId), //second subtitle Api
         // secondSublistsData = {},
-        authorization = getCookie("generalSettings"),token = `Bearer ${JSON.parse(authorization).token}`,//token
+        authorization = getCookie("token"),token = `Bearer ${authorization}`,//token
         header = {
             'authorization':token, //请求头
             'accept': 'application/json, text/javascript, */*; q=0.01',
@@ -78,7 +99,15 @@ async function sortList (eps){
         if(typeof vodData.data !== 'undefined') {
             urls = vodData.data.stream.url;
             url = Object.values(urls).reverse()[0];
+        }else {
+            flag = true;
+            vodApi = getVodApi(ccs_product_id) + '&duration=180&duration_start=0';
+            vodData = await sendAxio(vodApi,header); //请求
+            vodData = JSON.parse(vodData);
+            urls = vodData.data.stream.url;
+            url = Object.values(urls).reverse()[0];
         }
+        url = url.replace('&duration=180&duration_start=0','').replace('viu_var_aws.m3u8','viu_aws.m3u8');
         obj = {
             'title': curTitle,
             'url': url,
@@ -159,14 +188,22 @@ async function startDown(arr){
         }
     });
 }
+function getSubApi(id) {
+    let api = `https://api-gateway-global.viu.com/api/mobile?platform_flag_label=web&area_id=${global_area_id}&language_flag_id=${global_area_id}&platformFlagLabel=web&areaId=${global_area_id}&languageFlagId=${global_area_id}&ut=0&r=%2Fvod%2Fdetail&product_id=${id}&os_flag_id=1`;
+    return api;
+}
 
-function getApi(epId) {
-    let api = `https://www.viu.com${web_api_url}&product_id=${epId}&ut=0`.replace('&r=','&r=vod/ajax-detail&platform_flag_label=web');
+function getApi(series_id) {
+  // let api = `https://www.viu.com${web_api_url}&product_id=${epId}&ut=0`.replace('&r=','&r=vod/ajax-detail&platform_flag_label=web');
+    let api = `https://api-gateway-global.viu.com/api/mobile?platform_flag_label=web&area_id=${global_area_id}&language_flag_id=${global_area_id}&platformFlagLabel=web&areaId=${global_area_id}&languageFlagId=${global_area_id}&r=%2Fvod%2Fproduct-list&os_flag_id=1&series_id=${series_id}&size=-1&sort=asc`;
     return api;
 }
 
 function getVodApi(cId) {
     let api = `https://api-gateway-global.viu.com/api/playback/distribute?cpreference_id=&ccs_product_id=${cId}&language_flag_id=${global_area_id}`;
+    if(flag) {
+        api += '&duration=180&duration_start=0';
+    }
     return api;
 }
 
