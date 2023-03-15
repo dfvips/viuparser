@@ -107,7 +107,6 @@ async function sortList (eps){
             urls = vodData.data.stream.url;
             url = Object.values(urls).reverse()[0];
         }
-        url = url.replace('&duration=180&duration_start=0','').replace('viu_var_aws.m3u8','viu_aws.m3u8');
         obj = {
             'title': curTitle,
             'url': url,
